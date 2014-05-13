@@ -9,6 +9,15 @@ local all_callbacks = {
 	"joystickreleased", "textinput", "quit"
 }
 
+function venus.registerEvents()
+    for _,callback in pairs(all_callbacks) do
+        local backupFunc = love[callback]
+        love[callback] = function(...)
+            if backupFunc then backupFunc(...) end
+            if venus.current[callback] then venus.current[callback](...) end
+        end
+    end
+end
 
 -- globalCalls: Add your functions which you want to be called with every state's callback
 -- NOTE: Must be one of the callbacks from the all_callbacks list
