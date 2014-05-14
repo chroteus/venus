@@ -1,7 +1,15 @@
 venus = {}
 venus.current = "No state"
 venus.noState = true
+
 venus.currentFx = "fade"
+
+--[[ 
+List of transitions:
+
+1) fade: Default one. Fades in to a black rectangle which covers whole screen, then fades out to the next state.
+2) slide: Slides between states from right to left.
+]]--
 
 local all_callbacks = {
 	"update", "draw", "focus", "keypressed", "keyreleased",
