@@ -21,7 +21,9 @@ In addition to these, there are additional callbacks:
 * enter: Called each time you enter state.
 * leave: Called each time you leave state.
 
+
 Example:
+```lua
   tutorial = {} -- create state
 
   function tutorial:init() -- ran only once
@@ -59,3 +61,4 @@ Example:
   
   function tutorial:leave() -- ran each time you leave the state
   end
+```
