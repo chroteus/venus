@@ -22,7 +22,7 @@ function venus.registerEvents()
         local backupFunc = love[callback]
         love[callback] = function(...)
             if backupFunc then backupFunc(...) end
-            if venus.current[callback] then venus.current[callback](...) end
+            if venus.current[callback] then venus.current[callback](self, ...) end
         end
     end
 end
@@ -92,4 +92,4 @@ function venus.switch(to, effect)
     end
 end
 
-
+return venus
