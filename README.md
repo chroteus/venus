@@ -59,8 +59,6 @@ end
     
 
 State (tutorial.lua) file:
-(Note: State table itself does not have to be in a separate file. This is done for easier developement)
-
 ```lua
 tutorial = {} -- create state
 
