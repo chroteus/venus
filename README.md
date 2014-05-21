@@ -26,10 +26,14 @@ In addition to these, there are additional callbacks:
 Important note
 --------------
 
-Do NOT initialize anything in enter. Initialize/load everything in "init". 
-The reason: Before switching to a state and starting animation, state is initialized.
+Do NOT initialize anything in enter. Initialize/load everything in "init".
+
+#####The reason 
+Before switching to a state and starting animation, state is initialized.
 This is done in order to load or initialize everything (images, text...) needed for drawing when playing animation.
 "enter" is called when the animation stops and you finally enter the state.
+
+Instead, "enter" should be used to reset data.
 
 
 ***
