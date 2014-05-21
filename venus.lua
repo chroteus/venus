@@ -3,6 +3,11 @@ venus.current = "No state"
 venus.noState = true
 
 venus.currentFx = "slide"
+
+local transitions = {
+    fade = {},
+    slide = {}
+}
 --[[ 
 List of transitions:
 
@@ -83,18 +88,18 @@ function venus.switch(to, effect)
     if venus.noState then
         venus._switch(to)
     else
-        assert(transitions[effect], '"'..effect'"'.." animation does not exist.")
-        
         local effect = effect or venus.currentFx
+        assert(transitions[effect], '"'..effect..'"'.." animation does not exist.")
+        
         if venus.currentFx ~= effect then venus.currentFx = effect end
         transitions[effect].switch(to)
     end
 end
 
-local transitions = {}
+--#################--
+--###--EFFECTS--###--
 
 -- SLIDE ----------------------
-transitions.slide = {}
 local ts = transitions.slide
 
 transitions.slide.state = {}
@@ -132,7 +137,6 @@ end
 
 
 -- FADE ----------------------
-transitions.fade = {}
 local tf = transitions.fade
 
 tf.rect = {
@@ -178,7 +182,8 @@ transitions.fade.draw = function()
     tf.state:draw()
 end
 
--- HUMP.Timer
+--###############--
+--###--TIMER--###--
 
 --[[
 Copyright (c) 2010-2013 Matthias Richter
@@ -205,7 +210,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ]]--
-
 local Timer = {}
 Timer.__index = Timer
 
@@ -229,6 +233,37 @@ function Timer:update(dt)
 		self.functions[handle] = nil
 		handle.after(handle.after)
 	end
+end
+
+function Timer:do_for(delay, func, after)
+	local handle = {func = func, after = after or _nothing_}
+	self.functions[handle] = delay
+	return handle
+end
+
+function Timer:add(delay, func)
+	return self:do_for(delay, _nothing_, func)
+end
+
+function Timer:addPeriodic(delay, func, count)
+	local count, handle = count or math.huge -- exploit below: math.huge - 1 = math.huge
+
+	handle = self:add(delay, function(f)
+		if func(func) == false then return end
+		count = count - 1
+		if count > 0 then
+			self.functions[handle] = delay
+		end
+	end)
+	return handle
+end
+
+function Timer:cancel(handle)
+	self.functions[handle] = nil
+end
+
+function Timer:clear()
+	self.functions = {}
 end
 
 Timer.tween = setmetatable({
@@ -328,11 +363,17 @@ local default = new()
 venus.timer = setmetatable({
 	new         = new,
 	update      = function(...) return default:update(...) end,
+	do_for      = function(...) return default:do_for(...) end,
+	add         = function(...) return default:add(...) end,
+	addPeriodic = function(...) return default:addPeriodic(...) end,
+	cancel      = function(...) return default:cancel(...) end,
+	clear       = function(...) return default:clear(...) end,
 	tween       = setmetatable({}, {
 		__index    = Timer.tween,
 		__newindex = function(_,k,v) Timer.tween[k] = v end,
 		__call     = function(t,...) return default:tween(...) end,
 	})
 }, {__call = new})
+
 
 return venus
