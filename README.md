@@ -5,13 +5,27 @@ Venus is easy-to-use gamestate library with smooth transitions between states to
 
 Setup
 -----
+* Load venus. Anything can be used as a variable for venus. (ex: state = require("venus"))
 
-* Call venus.registerEvents() in love.load() to override love's callbacks. What it does is basically turning (love.callback) into (love.callback + venus.callback).
+* Call venus.registerEvents() in love.load() to override love's callbacks.
 
 * Call venus.timer.update(dt) in love.update(dt). HUMP.Timer (by vrld) is used for tweens in transitions.
 
-* Default transition animation is "fade". You can change the transition animation by changing venus.currentFx to the animation you want. (ex: "slide") 
+* Default transition animation is "fade". You can change the transition animation by changing value of venus.currentFx (List of animations and venus.currentFx can be found on top of the venus.lua).
 
+* Switch to a state using venus.switch(to, effect) or else nothing would appear.
+
+Functions
+---------
+
+#####venus.registerEvents()
+Turns love.callback into love.callback + venus.callback.
+This eliminates the need to call venus.callback in every love.callback.
+
+callback = (update, draw, keyreleased, etc)
+
+#####venus.switch(to, effect)
+Switches to a state. Effect is an optional argument and if it's absent venus.currentFx will be used.
 
 Callbacks
 ---------
