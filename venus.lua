@@ -13,7 +13,7 @@ venus = {}
 venus.current = "No state"
 venus.noState = true
 
-venus.currentFx = "fall"
+venus.currentFx = "fade"
 
 local transitions = {
     fade = {},
@@ -25,6 +25,7 @@ List of transitions:
 
 1) fade: Default one. Fades in to a black rectangle which covers whole screen, then fades out to the next state.
 2) slide: Slides between states from right to left.
+3) fall: Similar to slide, but "falls" downwards and has a slightly different animation.
 ]]--
 
 local all_callbacks = {
