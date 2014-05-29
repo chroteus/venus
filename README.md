@@ -5,35 +5,17 @@ Venus is easy-to-use gamestate library with smooth transitions between states to
 
 Setup
 -----
-* Load HUMP.timer. If you've loaded it as something other than like the example in the HUMP docs you can register your timer with venus.regsiterTimer(timer).
+* Load HUMP.timer. If you've loaded it as something other than like the example in the HUMP docs you can register your timer with `venus.timer = Timer` where `Timer` is an instance of HUMP.timer
 
-* Load venus. Anything can be used as a variable for venus. (ex: State = require("venus"))
+* Load venus. Anything can be used as a variable for venus. (ex: `State = require("venus")`)
 
-* Call venus.registerEvents() in love.load() to override love's callbacks.
+* Call `venus.registerEvents()` in `love.load()` to override love's callbacks.
 
-* Call Timer.update(dt) in love.update(dt). HUMP.Timer (by vrld) is used for tweens in transitions. So make sure you're calling update on whatever time you've registered with Venus.
+* Call `Timer.update(dt)` in `love.update(dt)`. HUMP.Timer (by vrld) is used for tweens in transitions. So make sure you're calling update on whatever time you've registered with Venus.
 
 * Default transition animation is "fade". You can change the transition animation by passing it as an argument to venus.switch (List of animations and venus.effects can be found on top of the venus.lua).
 
-* Switch to a state using venus.switch(to, effect) or else nothing would appear.
-
-Functions
----------
-
-#####venus.registerEvents()
-Turns love.callback into love.callback + venus.callback.
-This eliminates the need to call venus.callback in every love.callback.
-
-callback = (update, draw, keyreleased, etc)
-
-####venus.switch(to, effect, duration)
-Switches to a state. Effect is an optional argument and if it's absent venus.effect will be used. Duration is also optional and if it's absent venus.duration will be used. Current defaults are 'fade' and '0.5' respectively.
-
-####venus.setDefaultEffect(effect)
-A string. Sets default effect. If not called, the default value is "fade"
-
-####venus.setDefaultDuration(num)
-Sets default duration of effects. If not called, the default value is 1.
+* Switch to a state using `venus.switch` or else nothing would appear.
 
 Effects
 -------
@@ -46,6 +28,26 @@ Slides from right to left to the next state.
 
 #####fall
 Similar to slide, but with a different tween and the new state comes from above, while old state goes below.
+
+#####none
+Direct switch without transition effects. The rule of initializing everything in `init` does not apply to this transition.
+
+Functions
+---------
+
+#####venus.registerEvents()
+Turns love.callback into love.callback + venus.callback.
+This eliminates the need to call venus.callback in every love.callback.
+
+callback = (update, draw, keyreleased, etc)
+
+#####venus.switch(to, effect, duration)
+Switches to a state. Effect is an optional argument and if it's absent venus.effect will be used. Duration is also optional and if it's absent venus.duration will be used. Current defaults are 'fade' and '1' respectively.
+
+Setting Defaults
+----------------
+
+Set the default transition effect with `venus.effect = 'fade'` and the default transition duration with `venus.duration = 0.5`.
 
 Callbacks
 ---------
@@ -68,6 +70,7 @@ This is done in order to load or initialize everything (images, text...) needed 
 "enter" is called when the animation stops and you finally enter the state.
 
 Instead, "enter" should be used to reset data.
+
 
 
 ***
