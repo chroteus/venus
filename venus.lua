@@ -11,8 +11,6 @@ Permission is granted to anyone to use this software for any purpose, including 
 
 local venus = {}
 
-local function __NULL__() end
-
 -- set some sensible defaults.
 -- defaults can be set by referencing State.property when you set up your instance of Venus
 venus.duration = 1       -- default duration for transitions.
@@ -27,12 +25,12 @@ states.next    = {}
 
 -- internal function to the next state
 function states.switch()
-  _=_;(states.current.leave or __NULL__)()
+  if states.current.leave then states.current.leave() end
 
   states.current = states.next
-  ;(states.current.init or __NULL__)()
+  if states.current.init then states.current.init() end
   states.current.init = nil
-  ;(states.current.enter or __NULL__)()
+  if states.current.enter then states.current.enter() end
 
   states.tween = {}
 end
@@ -64,13 +62,13 @@ local all_callbacks = {
 function venus.registerEvents(timer)
   local registry = {}
   for _, f in ipairs(all_callbacks) do
-    registry[f] = love[f] or __NULL__
+    registry[f] = love[f] or function(...) end
     love[f] = function(...)
       registry[f](...)
       if f == 'draw' and states.tween.draw then
-        return states.tween.draw()
-      else
-        return (states.current[f] or __NULL__)(...)
+        states.tween.draw(...)
+      elseif states.current[f] then
+        states.current[f](...)
       end
     end
   end
@@ -97,11 +95,11 @@ end
 -- fade effect
 transitions.fade.state = {}
 
-function transitions.fade.state:draw()
-  if transitions.fade.complete then
-    _=_;(states.next.draw or __NULL__)()
-  else
-    _=_;(states.current.draw or __NULL__)()
+function transitions.fade.state:draw(...)
+  if transitions.fade.complete and states.next.draw then
+    states.next.draw(...)
+  elseif states.current.draw then
+    states.current.draw(...)
   end
 
   love.graphics.setColor(0, 0, 0, transitions.fade.alpha)
@@ -109,14 +107,14 @@ function transitions.fade.state:draw()
   love.graphics.setColor(255,255,255)
 end
 
-function transitions.fade.run(state, duration, ...)
+function transitions.fade.run(state, duration)
   transitions.fade.alpha = 0
   transitions.fade.complete = false
 
   states.tween = transitions.fade.state
   states.next  = state
 
-  ;(states.next.init or __NULL__)()
+  if states.next.init then states.next.init() end
   states.next.init = nil
 
   local f = function()
@@ -130,25 +128,25 @@ end
 -- slide effect
 transitions.slide.state = {}
 
-function transitions.slide.state:draw()
+function transitions.slide.state:draw(...)
   love.graphics.push()
   love.graphics.translate(transitions.slide.pos, 0)
-  ;(states.current.draw or __NULL__)()
+  if states.current.draw then states.current.draw(...) end
   love.graphics.pop()
 
   love.graphics.push()
   love.graphics.translate(transitions.slide.pos + love.window.getWidth(), 0)
-  ;(states.next.draw or __NULL__)()
+  if states.next.draw then states.next.draw(...) end
   love.graphics.pop()
 end
 
-function transitions.slide.run(state, duration, ...)
+function transitions.slide.run(state, duration)
   transitions.slide.pos = 0
 
   states.tween = transitions.slide.state
   states.next  = state
 
-  ;(states.next.init or __NULL__)()
+  if states.next.init then states.next.init() end
   states.next.init = nil
 
   venus.timer.tween(duration, transitions.slide, { pos = -love.window.getWidth() }, "out-quad", function() states.switch() end)
@@ -157,25 +155,25 @@ end
 -- fall effect
 transitions.fall.state = {}
 
-function transitions.fall.state:draw()
+function transitions.fall.state:draw(...)
   love.graphics.push()
   love.graphics.translate(0, transitions.fall.pos)
-  ;(states.current.draw or __NULL__)()
+  if states.current.draw then states.current.draw(...) end
   love.graphics.pop()
 
   love.graphics.push()
   love.graphics.translate(0, transitions.fall.pos - love.window.getHeight())
-  ;(states.next.draw or __NULL__)()
+  if states.next.draw then states.next.draw(...) end
   love.graphics.pop()
 end
 
-function transitions.fall.switch(to, duration, ...)
+function transitions.fall.switch(to, duration)
   transitions.fall.pos = 0
 
   states.tween = transitions.fall.state
   states.next  = state
 
-  ;(states.next.init or __NULL__)()
+  if states.next.init then states.next.init() end
   states.next.init = nil
 
   venus.timer.tween(duration, transitions.fall, { pos = love.window.getHeight() }, "out-quint", function() states.switch() end)
