@@ -37,17 +37,16 @@ end
 
 --[[
 List of transitions:
-
-1) none: transition instantly. Same as duration = 0
-2) fade: Default one. Fades in to a black rectangle which covers whole screen, then fades out to the next state.
-3) slide: Slides between states from right to left.
-4) fall: Similar to slide, but "falls" downwards and has a slightly different animation.
+1) fade: Default one. Fades in to a black rectangle which covers whole screen, then fades out to the next state.
+2) slide: Slides between states from right to left.
+3) fall: Similar to slide, but "falls" downwards and has a slightly different animation.
+4) none: Direct switch.
 ]]--
 local transitions = {
-  none = {},
   fade = {},
   slide = {},
   fall = {},
+  none = {},
 }
 
 local all_callbacks = {
