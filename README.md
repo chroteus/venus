@@ -26,13 +26,13 @@ This eliminates the need to call venus.callback in every love.callback.
 
 callback = (update, draw, keyreleased, etc)
 
-#####venus.switch(to, effect, duration)
+####venus.switch(to, effect, duration)
 Switches to a state. Effect is an optional argument and if it's absent venus.effect will be used. Duration is also optional and if it's absent venus.duration will be used. Current defaults are 'fade' and '0.5' respectively.
 
-#####venus.setDefaultEffect(effect)
+####venus.setDefaultEffect(effect)
 A string. Sets default effect. If not called, the default value is "fade"
 
-#####venus.setDefaultDuration(num)
+####venus.setDefaultDuration(num)
 Sets default duration of effects. If not called, the default value is 1.
 
 Effects
@@ -41,10 +41,10 @@ Effects
 #####fade
 Fades into a black state and then fades out to the next state.
 
-####slide
+#####slide
 Slides from right to left to the next state.
 
-####fall
+#####fall
 Similar to slide, but with a different tween and the new state comes from above, while old state goes below.
 
 Callbacks
