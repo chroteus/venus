@@ -10,13 +10,15 @@ Permission is granted to anyone to use this software for any purpose, including 
 ]]--
 
 local venus = {}
+venus.no_state = true
 
 local function __NULL__() end
 
 -- set some sensible defaults
-venus.duration = 0.5            -- default duration for transitions.
-venus.timer    = Timer          -- default HUMP.timer. Pass a HUMP.timer to venus.init if you'd like to use a different timer.
-venus.effect   = 'fade'         -- default transition effect
+venus.duration       = 1                    -- default duration for transitions.
+venus.timer          = Timer                -- default HUMP.timer. Pass a HUMP.timer to venus.init if you'd like to use a different timer.
+venus.default_effect = 'fade'               -- default effect
+venus.effect         = venus.default_effect -- current transition effect
 
 -- set up an initial state or things will fall in a heap. produces error on every callback
 venus.current  = setmetatable(
@@ -51,9 +53,19 @@ function venus.registerEvents(timer)
     registry[f] = love[f] or __NULL__
     love[f] = function(...)
       registry[f](...)
-      return (venus.current[f] or __NULL__)(...)
+      return (venus.current[f] or __NULL__)(self,...)
     end
   end
+end
+
+function venus.setDefaultEffect(effect)
+    assert(transitions[effect], '"'..effect..'"'..'effect does not exist.')
+    venus.default_effect = effect
+end
+
+function venus.setDefaultDuration(num)
+    assert(num >= 0, "Value passed to setDefaultDuration must be greater or equal to 0.")
+    venus.duration = num
 end
 
 -- regsiters an instance of HUMP.timer for use with Venus.
@@ -63,32 +75,36 @@ function venus.registerTimer(timer)
 end
 
 function venus._switch(to, ...)
-  assert(to, "Missing argument: Gamestate to switch to")
+    assert(to, "Missing argument: Gamestate to switch to")
 
-  local pre = venus.current
-  ;(pre.leave or __NULL__)()
+    local pre = venus.current
+    ;(pre.leave or __NULL__)()
 
-  ;(to.init or __NULL__)()
-  to.init = nil
+    ;(to.init or __NULL__)()
+    to.init = nil
 
-  ;(to.enter or __NULL__)()
-  venus.current = to
+    ;(to.enter or __NULL__)()
+    venus.current = to
 
-  -- reset to defaults
-  venus.duration = 0.5
-  venus.effect = 'fade'
+    -- reset to defaults
+    venus.effect = venus.default_effect
 end
 
 function venus.switch(to, effect, duration)
-  assert(to, "Missing argument: state to switch to")
+    if venus.no_state then
+        venus._switch(to)
+        venus.no_state = false
+    else
+        assert(to, "Missing argument: state to switch to")
+        
+        local duration = duration or venus.duration
+        assert(duration >= 0, 'Transition duration must be greater or equal to zero.')
 
-  duration = duration or venus.duration
-  assert(duration >= 0, 'Transition duration must be greater or equal to zero.')
+        venus.effect = effect or venus.effect
+        assert(transitions[venus.effect], venus.effect .. ' animation does not exist.')
 
-  venus.effect = effect or venus.effect
-  assert(transitions[venus.effect], venus.effect .. ' animation does not exist.')
-
-  transitions[venus.effect].switch(to, duration)
+        transitions[venus.effect].switch(to, duration)
+    end
 end
 
 -- fade effect
