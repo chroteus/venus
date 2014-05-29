@@ -15,7 +15,7 @@ local venus = {}
 -- defaults can be set by referencing State.property when you set up your instance of Venus
 venus.duration = 1       -- default duration for transitions.
 venus.effect   = 'fade'  -- default transition effect
-venus.timer    = Timer   -- sesible default for the HUMP.timer object.
+venus.timer    = Timer   -- sensible default for the HUMP.timer object.
 
 -- set up initial states or things will fall in a heap
 local states = {}
