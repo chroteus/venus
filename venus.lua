@@ -150,7 +150,7 @@ function transitions.slide.switch(to, duration, ...)
 
   venus._switch(transitions.slide.state)
 
-  venus.timer.tween(duration / 2, transitions.slide, { pos = -love.window.getWidth() }, "out-quad", function() venus._switch(to) end)
+  venus.timer.tween(duration, transitions.slide, { pos = -love.window.getWidth() }, "out-quad", function() venus._switch(to) end)
 end
 
 -- fall effect
@@ -178,7 +178,7 @@ function transitions.fall.switch(to, duration, ...)
 
   venus._switch(transitions.fall.state)
 
-  venus.timer.tween(duration / 2, transitions.fall, { pos = love.window.getHeight() }, "out-quint", function() venus._switch(to) end)
+  venus.timer.tween(duration, transitions.fall, { pos = love.window.getHeight() }, "out-quint", function() venus._switch(to) end)
 end
 
 return venus
