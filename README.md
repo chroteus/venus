@@ -1,17 +1,19 @@
 Venus
 =====
 
-Venus is easy-to-use gamestate library with smooth transitions between states to make games feel better, as direct switch doesn't look and feel good.
+Venus is easy-to-use gamestate library with smooth transitions between states to make games feel better, as direct switch doesn't look and feel good. It harnesses the power of HUMP.timer which you'll need to get from https://github.com/vrld/hump
 
 Setup
 -----
-* Load venus. Anything can be used as a variable for venus. (ex: state = require("venus"))
+* Load HUMP.timer. If you've loaded it as something other than like the example in the HUMP docs you can register your timer with venus.regsiterTimer(timer).
+
+* Load venus. Anything can be used as a variable for venus. (ex: State = require("venus"))
 
 * Call venus.registerEvents() in love.load() to override love's callbacks.
 
-* Call venus.timer.update(dt) in love.update(dt). HUMP.Timer (by vrld) is used for tweens in transitions.
+* Call Timer.update(dt) in love.update(dt). HUMP.Timer (by vrld) is used for tweens in transitions. So make sure you're calling update on whatever time you've registered with Venus.
 
-* Default transition animation is "fade". You can change the transition animation by changing value of venus.currentFx (List of animations and venus.currentFx can be found on top of the venus.lua).
+* Default transition animation is "fade". You can change the transition animation by passing it as an argument to venus.switch (List of animations and venus.effects can be found on top of the venus.lua).
 
 * Switch to a state using venus.switch(to, effect) or else nothing would appear.
 
@@ -24,8 +26,8 @@ This eliminates the need to call venus.callback in every love.callback.
 
 callback = (update, draw, keyreleased, etc)
 
-#####venus.switch(to, effect)
-Switches to a state. Effect is an optional argument and if it's absent venus.currentFx will be used.
+#####venus.switch(to, effect, duration)
+Switches to a state. Effect is an optional argument and if it's absent venus.effect will be used. Duration is also optional and if it's absent venus.duration will be used. Current defaults are 'fade' and '0.5' respectively.
 
 Callbacks
 ---------
@@ -42,7 +44,7 @@ Important note
 
 Do NOT initialize anything in enter. Initialize/load everything in "init".
 
-#####The reason 
+#####The reason
 Before switching to a state and starting animation, state is initialized.
 This is done in order to load or initialize everything (images, text...) needed for drawing when playing animation.
 "enter" is called when the animation stops and you finally enter the state.
@@ -57,20 +59,21 @@ Example:
 main.lua:
 
 ```lua
-venus = require "lib.venus"
+Timer = require "lib.timer" -- This is HUMP.timer
+State = require "lib.venus"
 require "states.tutorial"
 
 function love.load()
-    venus.registerEvents()
-    venus.switch(tutorial)
+    State.registerEvents()
+    State.switch(tutorial)
 end
 
 function love.update(dt)
-    venus.timer.update(dt)
+    Timer.update(dt)
 end
 ```
 
-    
+
 
 State (tutorial.lua) file:
 ```lua
@@ -83,31 +86,31 @@ function tutorial:init() -- ran only once
     Map:
     WASD/Mouse - Move camera
     Mouse wheel - Zoom in/out
-      
+
     ESC - Menu
     Tab - Character Screen
-      
+
     Battle:
-    Space - Attack 
+    Space - Attack
     Hotkey (or click) - Skill
     ]]
-    
+
     tutorial.btn = GenericButton(4, "Start >>", function() Gamestate.switch(game) end)
 end
 
 function tutorial:enter() -- ran every time you enter state
     print("Entered tutorial state")
 end
-  
+
 function tutorial:update(dt)
     tutorial.btn:update()
 end
-  
+
 function tutorial:draw()
     tutorial.btn:draw()
     love.graphics.printf(tutorial.text, 0, 100, the.screen.width, "center")
 end
-  
+
 function tutorial:mousereleased(x,y,button)
     tutorial.btn:mousereleased(x,y,button)
 end
