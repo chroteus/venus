@@ -14,25 +14,25 @@ local venus = {}
 local function __NULL__() end
 
 -- set some sensible defaults.
--- defaults can be set by referencing venus.propertyName when you set up your instance of Venus
-venus.duration = 0.5     -- default duration for transitions.
+-- defaults can be set by referencing State.property when you set up your instance of Venus
+venus.duration = 1       -- default duration for transitions.
 venus.effect   = 'fade'  -- default transition effect
 venus.timer    = Timer   -- sesible default for the HUMP.timer object.
 
 -- set up an initial state or things will fall in a heap. produces error on every callback
-venus.current  = setmetatable(
-  { leave = __NULL__ },
-  { __index = function() end }
-)
+venus.current  = {}
+venus.no_state = true
 
 --[[
 List of transitions:
 
-1) fade: Default one. Fades in to a black rectangle which covers whole screen, then fades out to the next state.
-2) slide: Slides between states from right to left.
-3) fall: Similar to slide, but "falls" downwards and has a slightly different animation.
+1) none: transition instantly. Same as duration = 0
+2) fade: Default one. Fades in to a black rectangle which covers whole screen, then fades out to the next state.
+3) slide: Slides between states from right to left.
+4) fall: Similar to slide, but "falls" downwards and has a slightly different animation.
 ]]--
 local transitions = {
+  none = {},
   fade = {},
   slide = {},
   fall = {},
@@ -46,7 +46,6 @@ local all_callbacks = {
   'joystickpressed', 'joystickreleased', 'joystickremoved'
 }
 
--- overides love's default events and binds venus' events in their place
 function venus.registerEvents(timer)
   local registry = {}
   for _, f in ipairs(all_callbacks) do
@@ -58,7 +57,6 @@ function venus.registerEvents(timer)
   end
 end
 
--- switch immediately without a transition
 function venus._switch(to, ...)
   assert(to, "Missing argument: Gamestate to switch to")
 
@@ -72,17 +70,20 @@ function venus._switch(to, ...)
   venus.current = to
 end
 
--- switch with transition
 function venus.switch(to, effect, duration)
   assert(to, "Missing argument: state to switch to")
 
-  duration = duration or venus.duration
-  assert(duration >= 0, 'Transition duration must be greater or equal to zero.')
+  if next(venus.current) == nil or effect == 'none' or duration == 0 then
+    venus._switch(to)
+  else
+    duration = duration or venus.duration
+    assert(duration >= 0, 'Transition duration must be greater or equal to zero.')
 
-  effect = effect or venus.effect
-  assert(transitions[effect], effect .. ' animation does not exist.')
+    effect = effect or venus.effect
+    assert(transitions[effect], effect .. ' animation does not exist.')
 
-  transitions[effect].switch(to, duration)
+    transitions[effect].switch(to, duration)
+  end
 end
 
 -- fade effect
