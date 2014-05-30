@@ -24,10 +24,13 @@ Effects
 Fades into a black state and then fades out to the next state.
 
 #####slide
-Slides from right to left to the next state.
+Slides the state depending on the direction you give to it. Not specifying a direction will use "slide_left"
 
-#####fall
-Similar to slide, but with a different tween and the new state comes from above, while old state goes below.
+* slide_right: Slides the state from left to right.
+* slide_left: Default if you used "slide" only. Slides to left.
+* slide_down: Slides the state down.
+* slide_up: Slides the state up.
+
 
 #####none
 Direct switch without transition effects. The rule of initializing everything in `init` does not apply to this transition.
