@@ -33,7 +33,6 @@ List of transitions:
 local transitions = {
   fade = {},
   slide = {},
-  fall = {},
   none = {}
 }
 
@@ -79,11 +78,15 @@ function venus.switch(to, effect, duration)
         assert(to, "Missing argument: state to switch to")
         
         local duration = duration or venus.duration
-        assert(duration >= 0, 'Transition duration must be greater or equal to zero.')
+        assert(duration >= 0, 'Transition duration must be greater than or equal to zero.')
 
         local effect = effect or venus.effect
-        assert(transitions[effect], venus.effect .. ' animation does not exist.')
+        assert(transitions[effect], effect .. ' animation does not exist.')
 
+        
+        ;(to.init or __NULL__)()
+        to.init = nil
+        
         transitions[effect].switch(to, duration)
     end
 end
@@ -108,12 +111,8 @@ function transitions.fade.switch(to, duration, ...)
     transitions.fade.switched = false
     transitions.fade.pre = venus.current
     transitions.fade.to = to
-
-    ;(to.init or __NULL__)()
-    to.init = nil
-
+    
     venus._switch(transitions.fade.state)
-
     local f = function()
         transitions.fade.switched = true
         venus.timer.tween(duration / 2, transitions.fade, { alpha = 0 }, "out-quad", function() venus._switch(to) end)
@@ -127,55 +126,58 @@ transitions.slide.state = {}
 
 function transitions.slide.state:draw()
     love.graphics.push()
-    love.graphics.translate(transitions.slide.pos, 0)
+    love.graphics.translate(transitions.slide.xpos, transitions.slide.ypos)
     ;(transitions.slide.pre.draw or __NULL__)()
     love.graphics.pop()
 
     love.graphics.push()
-    love.graphics.translate(transitions.slide.pos + love.window.getWidth(), 0)
+    
+    if transitions.slide.goal_xpos < 0 then
+        love.graphics.translate(transitions.slide.xpos + love.graphics.getWidth(), 0)
+    elseif transitions.slide.goal_xpos > 0 then
+        love.graphics.translate(transitions.slide.xpos - love.graphics.getWidth(), 0)
+    end
+ 
+    if transitions.slide.goal_ypos < 0 then
+        love.graphics.translate(0, transitions.slide.ypos + love.graphics.getHeight())
+    elseif transitions.slide.goal_ypos > 0 then
+        love.graphics.translate(0, transitions.slide.ypos - love.graphics.getHeight())
+    end
+    
     ;(transitions.slide.to.draw or __NULL__)()
     love.graphics.pop()
 end
 
-function transitions.slide.switch(to, duration, ...)
-    transitions.slide.pos = 0
+function transitions.slide.switch(to, duration, goal_xpos, goal_ypos)
+    transitions.slide.xpos = 0
+    transitions.slide.ypos = 0
+    transitions.slide.goal_xpos = goal_xpos or -love.window.getWidth()
+    transitions.slide.goal_ypos = goal_ypos or 0
+    
     transitions.slide.pre = venus.current
     transitions.slide.to = to
 
-    ;(to.init or __NULL__)()
-    to.init = nil
-
     venus._switch(transitions.slide.state)
 
-    venus.timer.tween(duration, transitions.slide, { pos = -love.window.getWidth() }, "out-quad", function() venus._switch(to) end)
+    venus.timer.tween(duration, transitions.slide, {xpos = transitions.slide.goal_xpos}, "out-quint", function() venus._switch(to) end)
+    venus.timer.tween(duration, transitions.slide, {ypos = transitions.slide.goal_ypos}, "out-quint", function() venus._switch(to) end)
 end
 
--- fall effect
-transitions.fall.state = {}
+transitions.slide_left = transitions.slide
 
-function transitions.fall.state:draw()
-    love.graphics.push()
-    love.graphics.translate(0, transitions.fall.pos)
-    ;(transitions.fall.pre.draw or __NULL__)()
-    love.graphics.pop()
-
-    love.graphics.push()
-    love.graphics.translate(0, transitions.fall.pos - love.window.getHeight())
-    ;(transitions.fall.to.draw or __NULL__)()
-    love.graphics.pop()
+transitions.slide_right = {}
+function transitions.slide_right.switch(to, duration)
+    transitions.slide.switch(to, duration, love.window.getWidth(), 0)
 end
 
-function transitions.fall.switch(to, duration, ...)
-    transitions.fall.pos = 0
-    transitions.fall.pre = venus.current
-    transitions.fall.to = to
+transitions.slide_down = {}
+function transitions.slide_down.switch(to, duration)
+    transitions.slide.switch(to, duration, 0, love.window.getHeight())
+end
 
-    ;(to.init or __NULL__)()
-    to.init = nil
-
-    venus._switch(transitions.fall.state)
-
-    venus.timer.tween(duration, transitions.fall, { pos = love.window.getHeight() }, "out-quint", function() venus._switch(to) end)
+transitions.slide_up = {}
+function transitions.slide_up.switch(to, duration)
+    transitions.slide.switch(to, duration, 0, -love.window.getHeight())
 end
 
 return venus
