@@ -61,13 +61,19 @@ local all_callbacks = {
 function venus.registerEvents(timer)
   local registry = {}
   for _, f in ipairs(all_callbacks) do
-    registry[f] = love[f] or function(...) end
+    registry[f] = love[f] or function() end
     love[f] = function(...)
-      registry[f](...)
       if f == 'draw' and states.tween.draw then
-        states.tween.draw(...)
-      elseif states.current[f] then
-        states.current[f](...)
+        -- during transitions we run states.tween.draw
+        registry[f](...)
+        return states.tween.draw(...)
+      elseif states.current[f] and next(states.tween) == nil then
+        -- if we're not executing a transition the default love and states.current callbacks are executed
+        registry[f](...)
+        return states.current[f](states.current, ...) -- I'm not sure why this does what it does. It allows using dt in states.
+      else
+        -- in all other cases the default love callback is run
+        return registry[f](...)
       end
     end
   end
